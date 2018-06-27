@@ -1,0 +1,5 @@
+services:
+    bitbag.poczta_polska_shipping_export_plugin.behat.mocker.poczta_polska_api_mocker:
+        class: Tests\BitBag\PocztaPolskaShippingExportPlugin\Behat\Mocker\PocztaPolskaApiMocker
+        arguments:
+            - '@sylius.behat.mocker'

@@ -1,0 +1,19 @@
+services:
+    bitbag.poczta_polska_shipping_export_plugin.form.type.poczta_polska_shipping_gateway:
+        class: BitBag\PocztaPolskaShippingExportPlugin\Form\Type\ShippingGatewayType
+        tags:
+            - { name: bitbag.shipping_gateway_configuration_type, type: 'poczta_polska', label: "Poczta Polska" }
+
+    bitbag.poczta_polska_shipping_export_plugin.event_listener.poczta_polska_shipping_export:
+        class: BitBag\PocztaPolskaShippingExportPlugin\EventListener\ShippingExportEventListener
+        arguments:
+            - '@bitbag.poczta_polska_shipping_export_plugin.api.web_client'
+            - '@bitbag.poczta_polska_shipping_export_plugin.api.soap_client'
+        tags:
+            - { name: kernel.event_listener, event: 'bitbag.export_shipment', method: exportShipment }
+
+    bitbag.poczta_polska_shipping_export_plugin.api.web_client:
+        class: BitBag\PocztaPolskaShippingExportPlugin\Api\WebClient
+
+    bitbag.poczta_polska_shipping_export_plugin.api.soap_client:
+        class: BitBag\PocztaPolskaShippingExportPlugin\Api\SoapClient

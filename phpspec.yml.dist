@@ -1,0 +1,2 @@
+suites:
+    PocztaPolskaShippingExport: { namespace: BitBag\PocztaPolskaShippingExportPlugin, psr4_prefix: BitBag\PocztaPolskaShippingExportPlugin, spec_path: src, src_path: src }
