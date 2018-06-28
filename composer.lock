@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f532b7050f470bb0485c445d22b6edc8",
+    "content-hash": "6e704f6088b5c6325c1b12631375a5aa",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -4384,6 +4384,52 @@
                 "test"
             ],
             "time": "2016-03-04T08:53:43+00:00"
+        },
+        {
+            "name": "printu/elektroniczny-nadawca",
+            "version": "1.0.50",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/printu/ElektronicznyNadawca.git",
+                "reference": "6db5f88ea06ece696343ba4a98e3a6c1ae91b562"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/printu/ElektronicznyNadawca/zipball/6db5f88ea06ece696343ba4a98e3a6c1ae91b562",
+                "reference": "6db5f88ea06ece696343ba4a98e3a6c1ae91b562",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PocztaPolska\\": "src/PocztaPolska"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Paweł Krzaczkowski",
+                    "email": "pawel@freshmind.pl",
+                    "homepage": "https://github.com/krzaczek"
+                }
+            ],
+            "description": "Elektroniczny Nadawca WebAPI",
+            "homepage": "https://e-nadawca.poczta-polska.pl/",
+            "keywords": [
+                "Poczta Polska",
+                "client",
+                "e-nadawca",
+                "elektroniczny nadawca",
+                "poczta-polska",
+                "soap"
+            ],
+            "time": "2018-06-04T08:16:39+00:00"
         },
         {
             "name": "psr/cache",

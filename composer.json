@@ -12,7 +12,8 @@
     "require": {
         "php": "^7.1",
         "sylius/sylius": "1.1.*",
-        "bitbag/shipping-export-plugin": "^1.2"
+        "bitbag/shipping-export-plugin": "^1.2",
+        "printu/elektroniczny-nadawca": "^1.0"
     },
     "require-dev": {
         "phpspec/phpspec": "^3.2",
