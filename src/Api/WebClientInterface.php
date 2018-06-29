@@ -4,6 +4,7 @@ namespace BitBag\PocztaPolskaShippingExportPlugin\Api;
 
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use Sylius\Component\Core\Model\ShipmentInterface;
+use PocztaPolska\getAddresLabelByGuidResponse;
 
 interface WebClientInterface
 {
@@ -21,4 +22,8 @@ interface WebClientInterface
      */
     public function setShipment(ShipmentInterface $shipment);
 
+    /**
+     * @return getAddresLabelByGuidResponse
+     */
+    public function createLabel();
 }

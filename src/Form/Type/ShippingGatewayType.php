@@ -45,6 +45,9 @@ final class ShippingGatewayType extends AbstractType
             ->add('phone_number', TextType::class, [
                 'label' => 'bitbag.ui.phone_number',
             ])
+            ->add('billing_account_number', TextType::class, [
+                'label' => 'bitbag.ui.billing_account_number',
+            ])
             ->add('shipment_start_hour', TextType::class, [
                 'label' => 'bitbag.ui.shipment_start_hour',
             ])

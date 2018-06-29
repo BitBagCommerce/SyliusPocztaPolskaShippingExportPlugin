@@ -3,14 +3,22 @@
 namespace BitBag\PocztaPolskaShippingExportPlugin\Api;
 
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
+use PocztaPolska\pobranieType;
+use PocztaPolska\przesylkaPobraniowaType;
+use PocztaPolska\sposobPobraniaType;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Model\ShipmentInterface;
+use PocztaPolska\addShipment;
+use PocztaPolska\adresType;
+use PocztaPolska\ElektronicznyNadawca;
+use PocztaPolska\gabarytType;
+use PocztaPolska\getAddresLabelByGuid;
+use PocztaPolska\kategoriaType;
+use PocztaPolska\paczkaPocztowaType;
 
 final class WebClient implements WebClientInterface
 {
-    const DATE_FORMAT = 'Y-m-d';
-
     /**
      * @var ShippingGatewayInterface
      */
@@ -20,6 +28,15 @@ final class WebClient implements WebClientInterface
      * @var ShipmentInterface
      */
     private $shipment;
+
+    /**
+     * @var string
+     */
+    private $guid;
+    /**
+     * @var ElektronicznyNadawca
+     */
+    private $connection;
 
     /**
      * {@inheritdoc}
@@ -37,121 +54,135 @@ final class WebClient implements WebClientInterface
         $this->shipment = $shipment;
     }
 
-
     /**
-     * @return array
+     * {@inheritdoc}
      */
-    public function getSender()
+    public function createLabel()
     {
-        return [
-            'fid' => $this->getShippingGatewayConfig('id'),
-            'name' => $this->getShippingGatewayConfig('name'),
-            'company' => $this->getShippingGatewayConfig('company'),
-            'address' => $this->getShippingGatewayConfig('address'),
-            'city' => $this->getShippingGatewayConfig('city'),
-            'postalCode' => $this->getShippingGatewayConfig('postal_code'),
-            'countryCode' => 'PL',
-            'email' => $this->getShippingGatewayConfig('email'),
-            'phone' => $this->getShippingGatewayConfig('phone_number'),
-        ];
+        $this->apiConstruct();
+
+        $this->connection->addShipment($this->createShipment());
+
+        $label = $this->connection->getAddresLabelByGuid($this->createParametersForLabel());
+
+        return $label;
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
-    public function getReceiver()
+    private function apiConstruct()
+    {
+        $this->connection = $this->connect();
+        $this->guid = $this->generateGuid();
+    }
+
+    /**
+     * @return ElektronicznyNadawca
+     */
+    private function connect()
+    {
+        return new ElektronicznyNadawca(
+            $this->getShippingGatewayConfig('wsdl'),
+            [
+                'login' => $this->getShippingGatewayConfig('login'),
+                'password' => $this->getShippingGatewayConfig('password')
+            ]
+        );
+    }
+
+    /**
+     * @return adresType
+     */
+    private function getAddress()
     {
         $shippingAddress = $this->getOrder()->getShippingAddress();
 
-        return [
-            'company' => $shippingAddress->getCompany(),
-            'name' => $shippingAddress->getFullName(),
-            'address' => $shippingAddress->getStreet(),
-            'city' => $shippingAddress->getCity(),
-            'postalCode' => str_replace('-', '', $shippingAddress->getPostcode()),
-            'countryCode' => 'PL',
-            'phone' => $shippingAddress->getPhoneNumber(),
-            'email' => '',
-        ];
+        $address = new adresType();
+        $address->nazwa = $shippingAddress->getCompany() . ' ' . $shippingAddress->getFullName();
+        $address->ulica = $shippingAddress->getStreet();
+        $address->miejscowosc = $shippingAddress->getCity();
+        $address->kodPocztowy = str_replace('-', '', $shippingAddress->getPostcode());
+
+        return $address;
     }
 
     /**
-     * @return array
+     * @return paczkaPocztowaType
      */
-    public function getParcels()
+    private function createPackage()
     {
-        return [
-            0 => [
-                'content' => $this->getContent(),
-                'weight' => $this->shipment->getShippingWeight(),
-            ],
-        ];
-    }
+        $package = new paczkaPocztowaType();
 
-    /**
-     * @return array
-     */
-    public function getServices()
-    {
         if ($this->isCashOnDelivery()) {
-            return [
-                'cod' => [
-                    'amount' => $this->getOrder()->getTotal() / 100,
-                    'currency' => 'PLN',
-                ],
-            ];
+//            TODO: Typy przesyłek. Czy paczki/listy itd.
+//            $package = new przesylkaPobraniowaType();
+            $package->pobranie = new pobranieType();
+            $package->pobranie->kwotaPobrania = $this->getOrder()->getTotal();
+            $package->pobranie->nrb = $this->getShippingGatewayConfig('billing_account_number');
+            $package->pobranie->sposobPobrania = sposobPobraniaType::RACHUNEK_BANKOWY;
+            $package->pobranie->tytulem = $this->getOrder()->getNumber();
         }
+
+        $package->adres = $this->getAddress();
+        $package->iloscPotwierdzenOdbioru = 1;
+        $package->kategoria = kategoriaType::EKONOMICZNA;
+        $package->gabaryt = gabarytType::GABARYT_A;
+        $package->masa = $this->shipment->getShippingWeight() * 100;
+        $package->guid = $this->guid;
+        $package->opis = $this->getContent();
+
+        return $package;
     }
 
     /**
-     * @return array
+     * @return boolean
      */
-    public function getPickupAddress()
+    private function isCashOnDelivery()
     {
-        return [
-            'fid' => $this->getShippingGatewayConfig('id'),
-//            'name' => 'NAME',
-//            'company' => 'COMPANY',
-//            'address' => 'ADDRESS',
-//            'city' => 'CITY',
-//            'postalCode' => '85132',
-//            'countryCode' => 'PL',
-//            'email'=> 'test@test.test',
-//            'phone' => '777888999',
-        ];
+        $codPaymentMethodCode = $this->getShippingGatewayConfig('cod_payment_method_code');
+        $payments = $this->getOrder()->getPayments();
+
+        foreach ($payments as $payment) {
+            return $payment->getMethod()->getCode() === $codPaymentMethodCode;
+        }
+
+        return false;
     }
 
     /**
-     * @return array
+     * @return addShipment
      */
-    public function getContactInfo()
+    private function createShipment()
     {
-        return [
-            'name' => $this->getShippingGatewayConfig('name'),
-            'company' => $this->getShippingGatewayConfig('company'),
-            'email' => $this->getShippingGatewayConfig('email'),
-            'phone' => $this->getShippingGatewayConfig('phone_number'),
-        ];
-    }
+        $package = $this->createPackage();
 
-    public function getPickupDate(): string
-    {
-        return $this->resolvePickupDate();
-    }
+        $shipment = new addShipment();
+        $shipment->przesylki[] = $package;
 
-    public function getPickupTimeFrom(): string
-    {
-
-        return $this->getShippingGatewayConfig('shipment_start_hour');
+        return $shipment;
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getPickupTimeTo(): string
+    private function generateGuid()
     {
+        mt_srand((double)microtime() * 10000);
+        $charid = strtoupper(md5(uniqid(rand(), true)));
 
-        return $this->getShippingGatewayConfig('shipment_end_hour');
+        return substr($charid, 0, 32);
+    }
+
+    /**
+     * @return getAddresLabelByGuid
+     */
+    private function createParametersForLabel()
+    {
+        $parameters = new getAddresLabelByGuid();
+        $parameters->guid = [$this->guid];
+
+        return $parameters;
     }
 
     /**
@@ -184,61 +215,6 @@ final class WebClient implements WebClientInterface
         $content = rtrim($content, ", ");
 
         return substr($content, 0, 30);
-    }
-
-
-    /**
-     * @return boolean
-     */
-    private function isCashOnDelivery()
-    {
-        $codPaymentMethodCode = $this->getShippingGatewayConfig('cod_payment_method_code');
-        $payments = $this->getOrder()->getPayments();
-
-        foreach ($payments as $payment) {
-            return $payment->getMethod()->getCode() === $codPaymentMethodCode;
-        }
-
-        return false;
-    }
-
-    /**
-     * @return string
-     */
-    private function resolvePickupDate()
-    {
-        $now = new \DateTime();
-        $breakingHour = $this->getShippingGatewayConfig('pickup_breaking_hour');
-
-        if (null !== $breakingHour && $now->format('H') >= (int)$breakingHour) {
-            $tomorrow = $now->modify("+1 day");
-
-            return $this->resolveWeekend($tomorrow)->format(self::DATE_FORMAT);
-        }
-
-        return $this->resolveWeekend($now)->format(self::DATE_FORMAT);
-    }
-
-    /**
-     * @param \DateTime $date
-     *
-     * @return \DateTime
-     */
-    private function resolveWeekend(\DateTime $date)
-    {
-        $dayOfWeek = (int)$date->format('N');
-
-        if ($dayOfWeek === 6) {
-
-            return $date->modify("+2 days");
-        }
-
-        if ($dayOfWeek === 7) {
-
-            return $date->modify("+1 day");
-        }
-
-        return $date;
     }
 
     /**
