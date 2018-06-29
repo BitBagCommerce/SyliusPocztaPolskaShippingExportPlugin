@@ -60,6 +60,6 @@ final class ShippingExportEventListener
 
         $exportShipmentEvent->saveShippingLabel($label->content->pdfContent, 'pdf');
         $exportShipmentEvent->addSuccessFlash();
-//        $exportShipmentEvent->exportShipment();
+        $exportShipmentEvent->exportShipment();
     }
 }
