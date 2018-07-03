@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6e704f6088b5c6325c1b12631375a5aa",
+    "content-hash": "ff67588f3cce2d9a6a6551cb00e05b01",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -4387,16 +4387,16 @@
         },
         {
             "name": "printu/elektroniczny-nadawca",
-            "version": "1.0.50",
+            "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/printu/ElektronicznyNadawca.git",
-                "reference": "6db5f88ea06ece696343ba4a98e3a6c1ae91b562"
+                "url": "https://github.com/damonsson/ElektronicznyNadawca.git",
+                "reference": "c9331eadab8fe6577cfa87c470229da2ec599d58"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/printu/ElektronicznyNadawca/zipball/6db5f88ea06ece696343ba4a98e3a6c1ae91b562",
-                "reference": "6db5f88ea06ece696343ba4a98e3a6c1ae91b562",
+                "url": "https://api.github.com/repos/damonsson/ElektronicznyNadawca/zipball/c9331eadab8fe6577cfa87c470229da2ec599d58",
+                "reference": "c9331eadab8fe6577cfa87c470229da2ec599d58",
                 "shasum": ""
             },
             "require": {
@@ -4408,7 +4408,6 @@
                     "PocztaPolska\\": "src/PocztaPolska"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -4422,14 +4421,17 @@
             "description": "Elektroniczny Nadawca WebAPI",
             "homepage": "https://e-nadawca.poczta-polska.pl/",
             "keywords": [
-                "Poczta Polska",
                 "client",
                 "e-nadawca",
                 "elektroniczny nadawca",
+                "poczta polska",
                 "poczta-polska",
                 "soap"
             ],
-            "time": "2018-06-04T08:16:39+00:00"
+            "support": {
+                "source": "https://github.com/damonsson/ElektronicznyNadawca/tree/master"
+            },
+            "time": "2018-07-03T23:26:06+00:00"
         },
         {
             "name": "psr/cache",
@@ -9114,7 +9116,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "printu/elektroniczny-nadawca": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
