@@ -115,10 +115,14 @@ final class WebClient implements WebClientInterface
         $package = new paczkaPocztowaType();
 
         if ($this->isCashOnDelivery()) {
-//            TODO: Typy przesyłek. Czy paczki/listy itd.
-//            $package = new przesylkaPobraniowaType();
+            $value = $this->getOrder()->getTotal();
+
+            if(method_exists($this->getOrder(), 'getCustomCod') && $this->getOrder()->getCustomCod()) {
+                $value = $this->getOrder()->getCustomCod();
+            }
+
             $package->pobranie = new pobranieType();
-            $package->pobranie->kwotaPobrania = $this->getOrder()->getTotal();
+            $package->pobranie->kwotaPobrania = $value;
             $package->pobranie->nrb = $this->getShippingGatewayConfig('billing_account_number');
             $package->pobranie->sposobPobrania = sposobPobraniaType::RACHUNEK_BANKOWY;
             $package->pobranie->tytulem = $this->getOrder()->getNumber();
@@ -128,9 +132,22 @@ final class WebClient implements WebClientInterface
         $package->iloscPotwierdzenOdbioru = 1;
         $package->kategoria = kategoriaType::EKONOMICZNA;
         $package->gabaryt = gabarytType::GABARYT_A;
-        $package->masa = $this->shipment->getShippingWeight() * 100;
+
+        $weight = $this->shipment->getShippingWeight();
+
+        if(method_exists($this->getOrder(), 'getCustomWeight') && $this->getOrder()->getCustomWeight()) {
+            $weight = $this->getOrder()->getCustomWeight();
+        }
+
+        $additionalInfo = '';
+
+        if(method_exists($this->getOrder(), 'getShippingNotes')) {
+            $additionalInfo = $this->getOrder()->getShippingNotes();
+        }
+
+        $package->masa = $weight * 100;
         $package->guid = $this->guid;
-        $package->opis = $this->getContent();
+        $package->opis = $this->getOrder()->getNumber() . $additionalInfo;
 
         return $package;
     }
