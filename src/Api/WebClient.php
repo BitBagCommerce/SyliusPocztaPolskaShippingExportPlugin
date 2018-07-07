@@ -147,7 +147,7 @@ final class WebClient implements WebClientInterface
 
         $package->masa = $weight * 100;
         $package->guid = $this->guid;
-        $package->opis = $this->getOrder()->getNumber() . $additionalInfo;
+        $package->opis = $this->getOrder()->getNumber() . ' | ' . $additionalInfo;
 
         return $package;
     }
