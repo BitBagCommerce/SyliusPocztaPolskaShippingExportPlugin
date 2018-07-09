@@ -3,8 +3,11 @@
 namespace BitBag\PocztaPolskaShippingExportPlugin\Api;
 
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
+use PocztaPolska\gabarytBiznesowaType;
 use PocztaPolska\pobranieType;
-use PocztaPolska\przesylkaPobraniowaType;
+use PocztaPolska\przesylkaBiznesowaType;
+use PocztaPolska\przesylkaPoleconaZagranicznaType;
+use PocztaPolska\przesylkaZagranicznaType;
 use PocztaPolska\sposobPobraniaType;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
@@ -112,7 +115,11 @@ final class WebClient implements WebClientInterface
      */
     private function createPackage()
     {
-        $package = new paczkaPocztowaType();
+        if($this->getOrder()->getShippingAddress()->getCountryCode() !== 'PL') {
+            $package = new przesylkaPoleconaZagranicznaType();
+        } else {
+            $package = new PrzesylkaBiznesowaType();
+        }
 
         if ($this->isCashOnDelivery()) {
             $value = $this->getOrder()->getTotal();
@@ -129,9 +136,10 @@ final class WebClient implements WebClientInterface
         }
 
         $package->adres = $this->getAddress();
-        $package->iloscPotwierdzenOdbioru = 1;
-        $package->kategoria = kategoriaType::EKONOMICZNA;
-        $package->gabaryt = gabarytType::GABARYT_A;
+        if($this->getOrder()->getShippingAddress()->getCountryCode() !== 'PL') {
+            $package->adres->kraj = $this->getOrder()->getShippingAddress()->getCountryCode();
+        }
+        $package->gabaryt = gabarytBiznesowaType::M;
 
         $weight = $this->shipment->getShippingWeight();
 
