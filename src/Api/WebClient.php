@@ -4,20 +4,19 @@ namespace BitBag\PocztaPolskaShippingExportPlugin\Api;
 
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use PocztaPolska\gabarytBiznesowaType;
+use PocztaPolska\getEnvelopeBufor;
+use PocztaPolska\getUrzedyNadania;
 use PocztaPolska\pobranieType;
 use PocztaPolska\przesylkaBiznesowaType;
 use PocztaPolska\przesylkaPoleconaZagranicznaType;
-use PocztaPolska\przesylkaZagranicznaType;
+use PocztaPolska\sendEnvelope;
 use PocztaPolska\sposobPobraniaType;
 use Sylius\Component\Core\Model\OrderInterface;
-use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Model\ShipmentInterface;
 use PocztaPolska\addShipment;
 use PocztaPolska\adresType;
 use PocztaPolska\ElektronicznyNadawca;
-use PocztaPolska\gabarytType;
 use PocztaPolska\getAddresLabelByGuid;
-use PocztaPolska\kategoriaType;
 use PocztaPolska\paczkaPocztowaType;
 
 final class WebClient implements WebClientInterface
@@ -62,11 +61,13 @@ final class WebClient implements WebClientInterface
      */
     public function createLabel()
     {
-        $this->apiConstruct();
+        $this->connection = $this->connect();
+        $this->guid = $this->generateGuid();
 
         $this->connection->addShipment($this->createShipment());
 
         $label = $this->connection->getAddresLabelByGuid($this->createParametersForLabel());
+
 
         return $label;
     }
@@ -74,10 +75,40 @@ final class WebClient implements WebClientInterface
     /**
      * {@inheritdoc}
      */
-    private function apiConstruct()
+    public function sendEnvelope()
     {
         $this->connection = $this->connect();
-        $this->guid = $this->generateGuid();
+
+        $packages = $this->connection->getEnvelopeBufor(new getEnvelopeBufor())->przesylka;
+
+        $packagesShipped = [];
+
+        if(is_array($packages)) {
+            foreach ($packages as $package) {
+                $packagesShipped[] = $package->numerNadania;
+            }
+        } else if($packages !== null) {
+            $packagesShipped[] = $packages->numerNadania;
+        } else {
+            return [];
+        }
+
+
+        $posts = $this->connection->getUrzedyNadania(new getUrzedyNadania());
+        $post = $posts->urzedyNadania[0];
+
+        $sendEnvelope = new sendEnvelope();
+        $sendEnvelope->urzadNadania = $post->urzadNadania;
+
+
+        $sendEnvelopeResponseType = $this->connection->sendEnvelope($sendEnvelope);
+
+
+        if ($sendEnvelopeResponseType->error === null) {
+            return $packagesShipped;
+        }
+
+        return [];
     }
 
     /**
@@ -115,7 +146,7 @@ final class WebClient implements WebClientInterface
      */
     private function createPackage()
     {
-        if($this->getOrder()->getShippingAddress()->getCountryCode() !== 'PL') {
+        if ($this->getOrder()->getShippingAddress()->getCountryCode() !== 'PL') {
             $package = new przesylkaPoleconaZagranicznaType();
         } else {
             $package = new PrzesylkaBiznesowaType();
@@ -124,7 +155,7 @@ final class WebClient implements WebClientInterface
         if ($this->isCashOnDelivery()) {
             $value = $this->getOrder()->getTotal();
 
-            if(method_exists($this->getOrder(), 'getCustomCod') && $this->getOrder()->getCustomCod()) {
+            if (method_exists($this->getOrder(), 'getCustomCod') && $this->getOrder()->getCustomCod()) {
                 $value = $this->getOrder()->getCustomCod();
             }
 
@@ -136,20 +167,21 @@ final class WebClient implements WebClientInterface
         }
 
         $package->adres = $this->getAddress();
-        if($this->getOrder()->getShippingAddress()->getCountryCode() !== 'PL') {
+        if ($this->getOrder()->getShippingAddress()->getCountryCode() !== 'PL') {
             $package->adres->kraj = $this->getOrder()->getShippingAddress()->getCountryCode();
         }
         $package->gabaryt = gabarytBiznesowaType::M;
+        $package->nadawca = $this->getAddress();
 
         $weight = $this->shipment->getShippingWeight();
 
-        if(method_exists($this->getOrder(), 'getCustomWeight') && $this->getOrder()->getCustomWeight()) {
+        if (method_exists($this->getOrder(), 'getCustomWeight') && $this->getOrder()->getCustomWeight()) {
             $weight = $this->getOrder()->getCustomWeight();
         }
 
         $additionalInfo = '';
 
-        if(method_exists($this->getOrder(), 'getShippingNotes')) {
+        if (method_exists($this->getOrder(), 'getShippingNotes')) {
             $additionalInfo = $this->getOrder()->getShippingNotes();
         }
 
@@ -216,30 +248,6 @@ final class WebClient implements WebClientInterface
     private function getOrder()
     {
         return $this->shipment->getOrder();
-    }
-
-    /**
-     * @return string
-     */
-    private function getContent()
-    {
-        $content = '';
-
-        /** @var OrderItemInterface $item */
-        foreach ($this->getOrder()->getItems() as $item) {
-
-            $mainTaxon = $item->getProduct()->getMainTaxon();
-
-            if ($mainTaxon !== null) {
-                if (stristr($content, $mainTaxon->getName()) === false) {
-                    $content .= $mainTaxon->getName() . ", ";
-                }
-            }
-        }
-
-        $content = rtrim($content, ", ");
-
-        return substr($content, 0, 30);
     }
 
     /**

@@ -26,4 +26,9 @@ interface WebClientInterface
      * @return getAddresLabelByGuidResponse
      */
     public function createLabel();
+
+    /**
+     * @return array
+     */
+    public function sendEnvelope();
 }
