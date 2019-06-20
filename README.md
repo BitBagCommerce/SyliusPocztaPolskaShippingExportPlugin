@@ -29,7 +29,7 @@ public function registerBundles()
     return array_merge(parent::registerBundles(), [
         ...
         
-        new BitBag\PocztaPolskaShippingExportPlugin\PocztaPolskaShippingExportPlugin(),
+        BitBag\SyliusPocztaPolskaShippingExportPlugin\BitBagSyliusPocztaPolskaShippingExportPlugin::class => ['all' => true],
     ]);
 }
 ```

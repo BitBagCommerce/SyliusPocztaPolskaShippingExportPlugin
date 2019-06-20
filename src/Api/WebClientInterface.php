@@ -1,6 +1,6 @@
 <?php
 
-namespace BitBag\PocztaPolskaShippingExportPlugin\Api;
+namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\Api;
 
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use Sylius\Component\Core\Model\ShipmentInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace BitBag\PocztaPolskaShippingExportPlugin\Api;
+namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\Api;
 
 interface SoapClientInterface
 {

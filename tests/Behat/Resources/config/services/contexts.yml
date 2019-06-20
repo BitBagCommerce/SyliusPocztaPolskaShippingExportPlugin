@@ -1,0 +1,25 @@
+services:
+    bitbag.poczta_polska_shipping_export_plugin.behat.context.ui.admin.shipping_gateway:
+        class: Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Context\Ui\Admin\ShippingGatewayContext
+        public: true
+        arguments:
+            - '@bitbag.poczta_polska_shipping_export_plugin.behat.page.admin.shipping_gateway.create'
+            - '@sylius.behat.current_page_resolver'
+            - '@sylius.behat.notification_checker'
+
+    bitbag.poczta_polska_shipping_export_plugin.behat.context.setup.shipping_gateway:
+        class: Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Context\Setup\ShippingGatewayContext
+        public: true
+        arguments:
+            - '@sylius.product_variant_resolver.default'
+            - '@sylius.repository.order'
+            - '@sylius.repository.shipment'
+            - '@doctrine.orm.entity_manager'
+            - '@sylius.behat.shared_storage'
+
+    bitbag.poczta_polska_shipping_export_plugin.behat.context.ui.admin.shipping_export:
+        class: Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Context\Ui\Admin\ShippingExportContext
+        public: true
+        arguments:
+            - '@bitbag.behat.page.admin.shipping_export.index'
+            - '@bitbag.poczta_polska_shipping_export_plugin.behat.mocker.poczta_polska_api_mocker'

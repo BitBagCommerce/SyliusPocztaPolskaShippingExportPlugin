@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\BitBag\PocztaPolskaShippingExportPlugin\Behat\Context\Setup;
+namespace Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Context\Setup;
 
 use Behat\Behat\Context\Context;
 use Doctrine\ORM\EntityManagerInterface;

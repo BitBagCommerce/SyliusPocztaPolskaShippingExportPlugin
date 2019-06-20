@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\BitBag\PocztaPolskaShippingExportPlugin\Behat\Context\Ui\Admin;
+namespace Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Context\Ui\Admin;
 
 use Behat\Behat\Context\Context;
 use Sylius\Behat\NotificationType;
@@ -8,7 +8,7 @@ use Sylius\Behat\Page\SymfonyPageInterface;
 use Sylius\Behat\Service\NotificationCheckerInterface;
 use Sylius\Behat\Service\Resolver\CurrentPageResolverInterface;
 use Tests\BitBag\SyliusShippingExportPlugin\Behat\Behaviour\ContainsError;
-use Tests\BitBag\PocztaPolskaShippingExportPlugin\Behat\Page\Admin\ShippingGateway\CreatePageInterface;
+use Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Page\Admin\ShippingGateway\CreatePageInterface;
 use Webmozart\Assert\Assert;
 
 final class ShippingGatewayContext implements Context

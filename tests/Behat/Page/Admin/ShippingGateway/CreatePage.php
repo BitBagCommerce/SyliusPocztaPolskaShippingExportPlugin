@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\BitBag\PocztaPolskaShippingExportPlugin\Behat\Page\Admin\ShippingGateway;
+namespace Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Page\Admin\ShippingGateway;
 
 use Sylius\Behat\Page\Admin\Crud\CreatePage as BaseCreatePage;
 use Tests\BitBag\SyliusShippingExportPlugin\Behat\Behaviour\ContainsError;

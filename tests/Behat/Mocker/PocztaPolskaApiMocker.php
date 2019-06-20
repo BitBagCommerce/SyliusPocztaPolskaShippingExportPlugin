@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\BitBag\PocztaPolskaShippingExportPlugin\Behat\Mocker;
+namespace Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Mocker;
 
-use BitBag\PocztaPolskaShippingExportPlugin\Api\SoapClientInterface;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\SoapClientInterface;
 use Sylius\Behat\Service\Mocker\MockerInterface;
 
 class PocztaPolskaApiMocker

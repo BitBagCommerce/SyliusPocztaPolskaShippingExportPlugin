@@ -1,7 +1,0 @@
-services:
-    bitbag.poczta_polska_shipping_export_plugin.behat.page.admin.shipping_gateway.create:
-        class: Tests\BitBag\PocztaPolskaShippingExportPlugin\Behat\Page\Admin\ShippingGateway\CreatePage
-        parent: sylius.behat.page.admin.crud.create
-        public: false
-        arguments:
-            - 'bitbag_admin_shipping_gateway_create'

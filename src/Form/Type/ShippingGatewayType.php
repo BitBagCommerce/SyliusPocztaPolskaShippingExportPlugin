@@ -1,18 +1,14 @@
 <?php
 
-namespace BitBag\PocztaPolskaShippingExportPlugin\Form\Type;
+namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 final class ShippingGatewayType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('wsdl', TextType::class, [

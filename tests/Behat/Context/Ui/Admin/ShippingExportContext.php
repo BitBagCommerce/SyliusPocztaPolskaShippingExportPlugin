@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\BitBag\PocztaPolskaShippingExportPlugin\Behat\Context\Ui\Admin;
+namespace Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Context\Ui\Admin;
 
 use Behat\Behat\Context\Context;
-use Tests\BitBag\PocztaPolskaShippingExportPlugin\Behat\Mocker\PocztaPolskaApiMocker;
+use Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Mocker\PocztaPolskaApiMocker;
 use Tests\BitBag\SyliusShippingExportPlugin\Behat\Page\Admin\ShippingExport\IndexPageInterface;
 
 final class ShippingExportContext implements Context

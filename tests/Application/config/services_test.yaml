@@ -1,0 +1,10 @@
+imports:
+    - { resource: "../../../vendor/bitbag/shipping-export-plugin/tests/Behat/Resources/services.yml" }
+    - { resource: "../../Behat/Resources/config/services.yml" }
+    - { resource: "../../../vendor/sylius/sylius/src/Sylius/Behat/Resources/config/services.xml" }
+
+services:
+    bitbag.poczta_polska_shipping_export_plugin.behat.mocker.poczta_polska_api_mocker:
+        class: Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Mocker\PocztaPolskaApiMocker
+        arguments:
+            - '@sylius.behat.mocker'

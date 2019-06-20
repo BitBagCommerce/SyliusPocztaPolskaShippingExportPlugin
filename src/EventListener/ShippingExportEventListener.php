@@ -1,9 +1,9 @@
 <?php
 
-namespace BitBag\PocztaPolskaShippingExportPlugin\EventListener;
+namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\EventListener;
 
-use BitBag\PocztaPolskaShippingExportPlugin\Api\SoapClientInterface;
-use BitBag\PocztaPolskaShippingExportPlugin\Api\WebClientInterface;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\SoapClientInterface;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\WebClientInterface;
 use BitBag\SyliusShippingExportPlugin\Event\ExportShipmentEvent;
 
 final class ShippingExportEventListener

@@ -1,9 +1,9 @@
 <?php
 
-namespace spec\BitBag\PocztaPolskaShippingExportPlugin\Api;
+namespace spec\BitBag\SyliusPocztaPolskaShippingExportPlugin\Api;
 
-use BitBag\PocztaPolskaShippingExportPlugin\Api\WebClient;
-use BitBag\PocztaPolskaShippingExportPlugin\Api\WebClientInterface;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\WebClient;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\WebClientInterface;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use PhpSpec\ObjectBehavior;
