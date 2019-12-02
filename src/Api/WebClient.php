@@ -134,7 +134,7 @@ final class WebClient implements WebClientInterface
 
         $address = new adresType();
         $address->nazwa = $shippingAddress->getCompany() . ' ' . $shippingAddress->getFullName();
-        $address->ulica = $shippingAddress->getStreet();
+        $address->ulica = $shippingAddress->getStreet(). ' ' . $shippingAddress->getBuildingNumber();
         $address->miejscowosc = $shippingAddress->getCity();
         $address->kodPocztowy = str_replace('-', '', $shippingAddress->getPostcode());
 
