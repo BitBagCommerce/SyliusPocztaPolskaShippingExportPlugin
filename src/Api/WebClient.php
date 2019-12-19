@@ -95,7 +95,7 @@ final class WebClient implements WebClientInterface
 
 
         $posts = $this->connection->getUrzedyNadania(new getUrzedyNadania());
-        $post = $posts->urzedyNadania[0];
+        $post = is_array($posts) ? $posts->urzedyNadania[0] : $posts;
 
         $sendEnvelope = new sendEnvelope();
         $sendEnvelope->urzadNadania = $post->urzadNadania;
