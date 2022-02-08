@@ -1,9 +1,18 @@
 <?php
 
+/*
+ * This file was created by developers working at BitBag
+ * Do you need more information about us and what we do? Visit our https://bitbag.io website!
+ * We are hiring developers from all over the world. Join us and start your new, exciting adventure and become part of us: https://bitbag.io/career
+*/
+
+declare(strict_types=1);
+
 namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\Api;
 
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use PocztaPolska\gabarytBiznesowaType;
+use PocztaPolska\getAddresLabelByGuidResponse;
 use PocztaPolska\getEnvelopeBufor;
 use PocztaPolska\getUrzedyNadania;
 use PocztaPolska\pobranieType;
@@ -11,71 +20,59 @@ use PocztaPolska\przesylkaBiznesowaType;
 use PocztaPolska\przesylkaPoleconaZagranicznaType;
 use PocztaPolska\sendEnvelope;
 use PocztaPolska\sposobPobraniaType;
+use SoapFault;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\ShipmentInterface;
 use PocztaPolska\addShipment;
 use PocztaPolska\adresType;
 use PocztaPolska\ElektronicznyNadawca;
 use PocztaPolska\getAddresLabelByGuid;
-use PocztaPolska\paczkaPocztowaType;
 
 final class WebClient implements WebClientInterface
 {
-    /**
-     * @var ShippingGatewayInterface
-     */
-    private $shippingGateway;
+    private ShippingGatewayInterface $shippingGateway;
 
-    /**
-     * @var ShipmentInterface
-     */
-    private $shipment;
+    private ShipmentInterface $shipment;
 
-    /**
-     * @var string
-     */
-    private $guid;
-    /**
-     * @var ElektronicznyNadawca
-     */
-    private $connection;
+    private string $guid;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setShippingGateway(ShippingGatewayInterface $shippingGateway)
+    private ElektronicznyNadawca $connection;
+
+    public function setShippingGateway(ShippingGatewayInterface $shippingGateway): void
     {
         $this->shippingGateway = $shippingGateway;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setShipment(ShipmentInterface $shipment)
+    public function setShipment(ShipmentInterface $shipment): void
     {
         $this->shipment = $shipment;
     }
 
     /**
-     * {@inheritdoc}
+     * @throws SoapFault
      */
-    public function createLabel()
+    public function createLabel(): getAddresLabelByGuidResponse
     {
         $this->connection = $this->connect();
         $this->guid = $this->generateGuid();
 
         $this->connection->addShipment($this->createShipment());
 
-        $label = $this->connection->getAddresLabelByGuid($this->createParametersForLabel());
+        return $this->connection->getAddresLabelByGuid($this->createParametersForLabel());
+    }
 
+    public function getLabelContent(): ?string
+    {
+        /** @var mixed $label */
+        $label = $this->createLabel()->content;
 
-        return $label;
+        return base64_decode($label->pdfContent);
     }
 
     /**
-     * {@inheritdoc}
+     * @throws SoapFault
      */
-    public function sendEnvelope()
+    public function sendEnvelope(): array
     {
         $this->connection = $this->connect();
 
@@ -85,10 +82,10 @@ final class WebClient implements WebClientInterface
 
         if(is_array($packages)) {
             foreach ($packages as $package) {
-                $packagesShipped[] = $package->numerNadania;
+                $packagesShipped[] = $package->guid;
             }
         } else if($packages !== null) {
-            $packagesShipped[] = $packages->numerNadania;
+            $packagesShipped[] = $packages->guid;
         } else {
             return [];
         }
@@ -112,9 +109,9 @@ final class WebClient implements WebClientInterface
     }
 
     /**
-     * @return ElektronicznyNadawca
+     * @throws SoapFault
      */
-    private function connect()
+    private function connect(): ElektronicznyNadawca
     {
         return new ElektronicznyNadawca(
             $this->getShippingGatewayConfig('wsdl'),
@@ -125,26 +122,20 @@ final class WebClient implements WebClientInterface
         );
     }
 
-    /**
-     * @return adresType
-     */
-    private function getAddress()
+    private function getAddress(): adresType
     {
         $shippingAddress = $this->getOrder()->getShippingAddress();
 
         $address = new adresType();
         $address->nazwa = $shippingAddress->getCompany() . ' ' . $shippingAddress->getFullName();
-        $address->ulica = $shippingAddress->getStreet(). ' ' . $shippingAddress->getBuildingNumber();
+        $address->ulica = $shippingAddress->getStreet();
         $address->miejscowosc = $shippingAddress->getCity();
         $address->kodPocztowy = str_replace('-', '', $shippingAddress->getPostcode());
 
         return $address;
     }
 
-    /**
-     * @return paczkaPocztowaType
-     */
-    private function createPackage()
+    private function createPackage(): object
     {
         if ($this->getOrder()->getShippingAddress()->getCountryCode() !== 'PL') {
             $package = new przesylkaPoleconaZagranicznaType();
@@ -154,10 +145,6 @@ final class WebClient implements WebClientInterface
 
         if ($this->isCashOnDelivery()) {
             $value = $this->getOrder()->getTotal();
-
-            if (method_exists($this->getOrder(), 'getCustomCod') && $this->getOrder()->getCustomCod()) {
-                $value = $this->getOrder()->getCustomCod();
-            }
 
             $package->pobranie = new pobranieType();
             $package->pobranie->kwotaPobrania = $value;
@@ -175,14 +162,10 @@ final class WebClient implements WebClientInterface
 
         $weight = $this->shipment->getShippingWeight();
 
-        if (method_exists($this->getOrder(), 'getCustomWeight') && $this->getOrder()->getCustomWeight()) {
-            $weight = $this->getOrder()->getCustomWeight();
-        }
-
         $additionalInfo = '';
 
-        if (method_exists($this->getOrder(), 'getShippingNotes')) {
-            $additionalInfo = $this->getOrder()->getShippingNotes();
+        if (method_exists($this->getOrder(), 'getNotes')) {
+            $additionalInfo = $this->getOrder()->getNotes();
         }
 
         $package->masa = $weight * 100;
@@ -192,10 +175,7 @@ final class WebClient implements WebClientInterface
         return $package;
     }
 
-    /**
-     * @return boolean
-     */
-    private function isCashOnDelivery()
+    private function isCashOnDelivery(): bool
     {
         $codPaymentMethodCode = $this->getShippingGatewayConfig('cod_payment_method_code');
         $payments = $this->getOrder()->getPayments();
@@ -207,10 +187,7 @@ final class WebClient implements WebClientInterface
         return false;
     }
 
-    /**
-     * @return addShipment
-     */
-    private function createShipment()
+    private function createShipment(): addShipment
     {
         $package = $this->createPackage();
 
@@ -220,21 +197,15 @@ final class WebClient implements WebClientInterface
         return $shipment;
     }
 
-    /**
-     * @return string
-     */
-    private function generateGuid()
+    private function generateGuid(): string
     {
-        mt_srand((double)microtime() * 10000);
-        $charid = strtoupper(md5(uniqid(rand(), true)));
-
+        mt_srand((int)microtime()*10000);
+        $charid = strtoupper(md5(uniqid((string)rand(), true)));
         return substr($charid, 0, 32);
+
     }
 
-    /**
-     * @return getAddresLabelByGuid
-     */
-    private function createParametersForLabel()
+    private function createParametersForLabel(): getAddresLabelByGuid
     {
         $parameters = new getAddresLabelByGuid();
         $parameters->guid = [$this->guid];
@@ -242,19 +213,12 @@ final class WebClient implements WebClientInterface
         return $parameters;
     }
 
-    /**
-     * @return OrderInterface|\Sylius\Component\Order\Model\OrderInterface
-     */
-    private function getOrder()
+    private function getOrder(): OrderInterface
     {
         return $this->shipment->getOrder();
     }
 
-    /**
-     * @param $config
-     *
-     * @return string
-     */
+    /** @return mixed */
     private function getShippingGatewayConfig($config)
     {
         return $this->shippingGateway->getConfigValue($config);

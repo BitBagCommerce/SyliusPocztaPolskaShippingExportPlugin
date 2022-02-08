@@ -1,2 +1,4 @@
 suites:
-    PocztaPolskaShippingExport: { namespace: BitBag\SyliusPocztaPolskaShippingExportPlugin, psr4_prefix: BitBag\SyliusPocztaPolskaShippingExportPlugin, spec_path: src, src_path: src }
+    main:
+        namespace: BitBag\SyliusPocztaPolskaShippingExportPlugin
+        psr4_prefix: BitBag\SyliusPocztaPolskaShippingExportPlugin

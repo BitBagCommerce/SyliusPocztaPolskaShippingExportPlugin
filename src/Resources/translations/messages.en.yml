@@ -41,6 +41,9 @@ bitbag:
         pallet: Palette
         cod_cash: Cash payment
         cod_bank_transfer: Bank transfer
+        address: Address
+        email: E-mail
+        company: Company
 poczta_polska:
     ui:
         payment_type: Payment method

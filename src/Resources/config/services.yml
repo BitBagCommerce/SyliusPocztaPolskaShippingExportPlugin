@@ -7,13 +7,13 @@ services:
     bitbag.poczta_polska_shipping_export_plugin.event_listener.poczta_polska_shipping_export:
         class: BitBag\SyliusPocztaPolskaShippingExportPlugin\EventListener\ShippingExportEventListener
         arguments:
+            - '@filesystem'
+            - '@bitbag.repository.shipping_export'
+            - '%bitbag.shipping_labels_path%'
             - '@bitbag.poczta_polska_shipping_export_plugin.api.web_client'
-            - '@bitbag.poczta_polska_shipping_export_plugin.api.soap_client'
+            - '@session.flash_bag'
         tags:
-            - { name: kernel.event_listener, event: 'bitbag.export_shipment', method: exportShipment }
+            - { name: kernel.event_listener, event: 'bitbag.shipping_export.export_shipment', method: exportShipment }
 
     bitbag.poczta_polska_shipping_export_plugin.api.web_client:
         class: BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\WebClient
-
-    bitbag.poczta_polska_shipping_export_plugin.api.soap_client:
-        class: BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\SoapClient
