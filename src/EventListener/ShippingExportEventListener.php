@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\EventListener;
 
 use BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\WebClientInterface;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\EventListener\ShippingExportEventListener\ShippingExportFileProviderInterface;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingExportInterface;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use BitBag\SyliusShippingExportPlugin\Repository\ShippingExportRepository;
@@ -35,6 +36,8 @@ final class ShippingExportEventListener
 
     private FlashBagInterface $flashBag;
 
+    private ShippingExportFileProviderInterface $exportFileProvider;
+
     /** @var mixed */
     private $response;
 
@@ -43,13 +46,15 @@ final class ShippingExportEventListener
         ShippingExportRepository $shippingExportRepository,
         string $shippingLabelsPath,
         WebClientInterface $webClient,
-        FlashBagInterface $flashBag
+        FlashBagInterface $flashBag,
+        ShippingExportFileProviderInterface $exportFileProvider
     ) {
         $this->filesystem = $filesystem;
         $this->shippingExportRepository = $shippingExportRepository;
         $this->shippingLabelsPath = $shippingLabelsPath;
         $this->webClient = $webClient;
         $this->flashBag = $flashBag;
+        $this->exportFileProvider = $exportFileProvider;
     }
 
     public function exportShipment(ResourceControllerEvent $event): void
@@ -103,34 +108,13 @@ final class ShippingExportEventListener
         string $labelExtension
     ): void {
         $labelPath = $this->shippingLabelsPath
-            . '/' . $this->getFilename($shippingExport)
+            . '/' . $this->exportFileProvider->getFilename($shippingExport)
             . '.' . $labelExtension;
 
         $this->filesystem->dumpFile($labelPath, $labelContent);
         $shippingExport->setLabelPath($labelPath);
 
         $this->shippingExportRepository->add($shippingExport);
-    }
-
-    private function getFilename(ShippingExportInterface $shippingExport): string
-    {
-        $shipment = $shippingExport->getShipment();
-        Assert::notNull($shipment);
-
-        $order = $shipment->getOrder();
-        Assert::notNull($order);
-
-        $orderNumber = $order->getNumber();
-
-        $shipmentId = $shipment->getId();
-
-        return implode(
-            '_',
-            [
-                $shipmentId,
-                preg_replace('~[^A-Za-z0-9]~', '', $orderNumber),
-            ]
-        );
     }
 
     private function markShipmentAsExported(ShippingExportInterface $shippingExport): void
