@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\EventListener;
 
 use BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\WebClientInterface;
-use BitBag\SyliusPocztaPolskaShippingExportPlugin\EventListener\ShippingExportEventListener\ShippingExportFileProviderInterface;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Generator\FileNameGeneratorInterface;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingExportInterface;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use BitBag\SyliusShippingExportPlugin\Repository\ShippingExportRepository;
@@ -36,10 +36,7 @@ final class ShippingExportEventListener
 
     private FlashBagInterface $flashBag;
 
-    private ShippingExportFileProviderInterface $exportFileProvider;
-
-    /** @var mixed */
-    private $response;
+    private FileNameGeneratorInterface $fileNameGenerator;
 
     public function __construct(
         Filesystem $filesystem,
@@ -47,14 +44,14 @@ final class ShippingExportEventListener
         string $shippingLabelsPath,
         WebClientInterface $webClient,
         FlashBagInterface $flashBag,
-        ShippingExportFileProviderInterface $exportFileProvider
+        fileNameGeneratorInterface $fileNameGenerator
     ) {
         $this->filesystem = $filesystem;
         $this->shippingExportRepository = $shippingExportRepository;
         $this->shippingLabelsPath = $shippingLabelsPath;
         $this->webClient = $webClient;
         $this->flashBag = $flashBag;
-        $this->exportFileProvider = $exportFileProvider;
+        $this->fileNameGenerator = $fileNameGenerator;
     }
 
     public function exportShipment(ResourceControllerEvent $event): void
@@ -78,7 +75,7 @@ final class ShippingExportEventListener
             $this->webClient->setShippingGateway($shippingGateway);
             $this->webClient->setShipment($shipment);
 
-            $this->response = $this->webClient->createLabel();
+            $this->webClient->createLabel();
 
             $labelContent = $this->webClient->getLabelContent();
             Assert::notNull($labelContent);
@@ -97,7 +94,6 @@ final class ShippingExportEventListener
             return;
         }
 
-
         $this->flashBag->add('success', 'bitbag.ui.shipment_data_has_been_exported');
         $this->markShipmentAsExported($shippingExport);
     }
@@ -108,7 +104,7 @@ final class ShippingExportEventListener
         string $labelExtension
     ): void {
         $labelPath = $this->shippingLabelsPath
-            . '/' . $this->exportFileProvider->getFilename($shippingExport)
+            . '/' . $this->fileNameGenerator->generate($shippingExport)
             . '.' . $labelExtension;
 
         $this->filesystem->dumpFile($labelPath, $labelContent);
