@@ -12,12 +12,38 @@ services:
             - '%bitbag.shipping_labels_path%'
             - '@bitbag.poczta_polska_shipping_export_plugin.api.web_client'
             - '@session.flash_bag'
-            - '@bitbag.poczta_polska_shipping_export_plugin.export_file_provider'
+            - '@bitbag.poczta_polska_shipping_export_plugin.file_name_generator'
         tags:
             - { name: kernel.event_listener, event: 'bitbag.shipping_export.export_shipment', method: exportShipment }
 
     bitbag.poczta_polska_shipping_export_plugin.api.web_client:
         class: BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\WebClient
+        arguments:
+            - '@bitbag.poczta_polska_shipping_export_plugin.guid_generator'
+            - '@bitbag.poczta_polska_shipping_export_plugin.label_parameters_factory'
+            - '@bitbag.poczta_polska_shipping_export_plugin.shipment_factory'
+            - '@bitbag.poczta_polska_shipping_export_plugin.address_factory'
+            - '@bitbag.poczta_polska_shipping_export_plugin.package_factory'
 
-    bitbag.poczta_polska_shipping_export_plugin.export_file_provider:
-        class: BitBag\SyliusPocztaPolskaShippingExportPlugin\EventListener\ShippingExportEventListener\ShippingExportFileProvider
+    bitbag.poczta_polska_shipping_export_plugin.file_name_generator:
+        class: BitBag\SyliusPocztaPolskaShippingExportPlugin\Generator\FileNameGenerator
+
+    bitbag.poczta_polska_shipping_export_plugin.guid_generator:
+        class: BitBag\SyliusPocztaPolskaShippingExportPlugin\Generator\GuidGenerator
+
+    bitbag.poczta_polska_shipping_export_plugin.label_parameters_factory:
+        class: BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\LabelParametersFactory
+
+    bitbag.poczta_polska_shipping_export_plugin.shipment_factory:
+        class: BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\ShipmentFactory
+
+    bitbag.poczta_polska_shipping_export_plugin.package_factory:
+        class: BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\PackageFactory
+        arguments:
+            - '@bitbag.poczta_polska_shipping_export_plugin.payment_checker'
+
+    bitbag.poczta_polska_shipping_export_plugin.address_factory:
+        class: BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\AddressFactory
+
+    bitbag.poczta_polska_shipping_export_plugin.payment_checker:
+        class: BitBag\SyliusPocztaPolskaShippingExportPlugin\Checker\PaymentChecker
