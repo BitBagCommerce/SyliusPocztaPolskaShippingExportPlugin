@@ -10,23 +10,20 @@ declare(strict_types=1);
 
 namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\Api;
 
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\LabelParametersFactory;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\PackageFactory;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\ShipmentFactory;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\AddressFactory;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Generator\GuidGenerator;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
-use PocztaPolska\gabarytBiznesowaType;
 use PocztaPolska\getAddresLabelByGuidResponse;
 use PocztaPolska\getEnvelopeBufor;
 use PocztaPolska\getUrzedyNadania;
-use PocztaPolska\pobranieType;
-use PocztaPolska\przesylkaBiznesowaType;
-use PocztaPolska\przesylkaPoleconaZagranicznaType;
 use PocztaPolska\sendEnvelope;
-use PocztaPolska\sposobPobraniaType;
 use SoapFault;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\ShipmentInterface;
-use PocztaPolska\addShipment;
-use PocztaPolska\adresType;
 use PocztaPolska\ElektronicznyNadawca;
-use PocztaPolska\getAddresLabelByGuid;
 
 final class WebClient implements WebClientInterface
 {
@@ -34,9 +31,31 @@ final class WebClient implements WebClientInterface
 
     private ShipmentInterface $shipment;
 
-    private string $guid;
-
     private ElektronicznyNadawca $connection;
+
+    private GuidGenerator $guidGenerator;
+
+    private LabelParametersFactory $labelParametersFactory;
+
+    private ShipmentFactory $shipmentFactory;
+
+    private AddressFactory $addressFactory;
+
+    private PackageFactory $packageFactory;
+
+    public function __construct(
+        GuidGenerator $guidGenerator,
+        LabelParametersFactory $labelParametersFactory,
+        ShipmentFactory $shipmentFactory,
+        AddressFactory $addressFactory,
+        PackageFactory $packageFactory
+    ) {
+        $this->guidGenerator = $guidGenerator;
+        $this->labelParametersFactory = $labelParametersFactory;
+        $this->shipmentFactory = $shipmentFactory;
+        $this->addressFactory = $addressFactory;
+        $this->packageFactory = $packageFactory;
+    }
 
     public function setShippingGateway(ShippingGatewayInterface $shippingGateway): void
     {
@@ -54,19 +73,23 @@ final class WebClient implements WebClientInterface
     public function createLabel(): getAddresLabelByGuidResponse
     {
         $this->connection = $this->connect();
-        $this->guid = $this->generateGuid();
+        $guid = $this->guidGenerator->generate();
 
-        $this->connection->addShipment($this->createShipment());
+        $package = $this->packageFactory->createNew(
+            $this->addressFactory->createNew($this->getOrder()),
+            $this->shippingGateway,
+            $guid,
+            $this->shipment
+        );
 
-        return $this->connection->getAddresLabelByGuid($this->createParametersForLabel());
+        $this->connection->addShipment($this->shipmentFactory->createNew($package));
+
+        return $this->connection->getAddresLabelByGuid($this->labelParametersFactory->createNew($guid));
     }
 
     public function getLabelContent(): ?string
     {
-        /** @var mixed $label */
-        $label = $this->createLabel()->content;
-
-        return base64_decode($label->pdfContent);
+        return base64_decode((string)$this->createLabel()->content->pdfContent);
     }
 
     /**
@@ -89,7 +112,6 @@ final class WebClient implements WebClientInterface
         } else {
             return [];
         }
-
 
         $posts = $this->connection->getUrzedyNadania(new getUrzedyNadania());
         $post = is_array($posts) ? $posts->urzedyNadania[0] : $posts;
@@ -120,97 +142,6 @@ final class WebClient implements WebClientInterface
                 'password' => $this->getShippingGatewayConfig('password')
             ]
         );
-    }
-
-    private function getAddress(): adresType
-    {
-        $shippingAddress = $this->getOrder()->getShippingAddress();
-
-        $address = new adresType();
-        $address->nazwa = $shippingAddress->getCompany() . ' ' . $shippingAddress->getFullName();
-        $address->ulica = $shippingAddress->getStreet();
-        $address->miejscowosc = $shippingAddress->getCity();
-        $address->kodPocztowy = str_replace('-', '', $shippingAddress->getPostcode());
-
-        return $address;
-    }
-
-    private function createPackage(): object
-    {
-        if ($this->getOrder()->getShippingAddress()->getCountryCode() !== 'PL') {
-            $package = new przesylkaPoleconaZagranicznaType();
-        } else {
-            $package = new PrzesylkaBiznesowaType();
-        }
-
-        if ($this->isCashOnDelivery()) {
-            $value = $this->getOrder()->getTotal();
-
-            $package->pobranie = new pobranieType();
-            $package->pobranie->kwotaPobrania = $value;
-            $package->pobranie->nrb = $this->getShippingGatewayConfig('billing_account_number');
-            $package->pobranie->sposobPobrania = sposobPobraniaType::RACHUNEK_BANKOWY;
-            $package->pobranie->tytulem = $this->getOrder()->getNumber();
-        }
-
-        $package->adres = $this->getAddress();
-        if ($this->getOrder()->getShippingAddress()->getCountryCode() !== 'PL') {
-            $package->adres->kraj = $this->getOrder()->getShippingAddress()->getCountryCode();
-        }
-        $package->gabaryt = gabarytBiznesowaType::M;
-        $package->nadawca = $this->getAddress();
-
-        $weight = $this->shipment->getShippingWeight();
-
-        $additionalInfo = '';
-
-        if (method_exists($this->getOrder(), 'getNotes')) {
-            $additionalInfo = $this->getOrder()->getNotes();
-        }
-
-        $package->masa = $weight * 100;
-        $package->guid = $this->guid;
-        $package->opis = $this->getOrder()->getNumber() . ' | ' . $additionalInfo;
-
-        return $package;
-    }
-
-    private function isCashOnDelivery(): bool
-    {
-        $codPaymentMethodCode = $this->getShippingGatewayConfig('cod_payment_method_code');
-        $payments = $this->getOrder()->getPayments();
-
-        foreach ($payments as $payment) {
-            return $payment->getMethod()->getCode() === $codPaymentMethodCode;
-        }
-
-        return false;
-    }
-
-    private function createShipment(): addShipment
-    {
-        $package = $this->createPackage();
-
-        $shipment = new addShipment();
-        $shipment->przesylki[] = $package;
-
-        return $shipment;
-    }
-
-    private function generateGuid(): string
-    {
-        mt_srand((int)microtime()*10000);
-        $charid = strtoupper(md5(uniqid((string)rand(), true)));
-        return substr($charid, 0, 32);
-
-    }
-
-    private function createParametersForLabel(): getAddresLabelByGuid
-    {
-        $parameters = new getAddresLabelByGuid();
-        $parameters->guid = [$this->guid];
-
-        return $parameters;
     }
 
     private function getOrder(): OrderInterface
