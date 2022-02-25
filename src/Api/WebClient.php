@@ -10,11 +10,11 @@ declare(strict_types=1);
 
 namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\Api;
 
-use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\LabelParametersFactory;
-use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\PackageFactory;
-use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\ShipmentFactory;
-use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\AddressFactory;
-use BitBag\SyliusPocztaPolskaShippingExportPlugin\Generator\GuidGenerator;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\AddressFactoryInterface;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\LabelParametersFactoryInterface;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\PackageFactoryInterface;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\ShipmentFactoryInterface;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Generator\GuidGeneratorInterface;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use PocztaPolska\getAddresLabelByGuidResponse;
 use PocztaPolska\getEnvelopeBufor;
@@ -33,22 +33,22 @@ final class WebClient implements WebClientInterface
 
     private ElektronicznyNadawca $connection;
 
-    private GuidGenerator $guidGenerator;
+    private GuidGeneratorInterface $guidGenerator;
 
-    private LabelParametersFactory $labelParametersFactory;
+    private LabelParametersFactoryInterface $labelParametersFactory;
 
-    private ShipmentFactory $shipmentFactory;
+    private ShipmentFactoryInterface $shipmentFactory;
 
-    private AddressFactory $addressFactory;
+    private AddressFactoryInterface $addressFactory;
 
-    private PackageFactory $packageFactory;
+    private PackageFactoryInterface $packageFactory;
 
     public function __construct(
-        GuidGenerator $guidGenerator,
-        LabelParametersFactory $labelParametersFactory,
-        ShipmentFactory $shipmentFactory,
-        AddressFactory $addressFactory,
-        PackageFactory $packageFactory
+        GuidGeneratorInterface $guidGenerator,
+        LabelParametersFactoryInterface $labelParametersFactory,
+        ShipmentFactoryInterface $shipmentFactory,
+        AddressFactoryInterface $addressFactory,
+        PackageFactoryInterface $packageFactory
     ) {
         $this->guidGenerator = $guidGenerator;
         $this->labelParametersFactory = $labelParametersFactory;

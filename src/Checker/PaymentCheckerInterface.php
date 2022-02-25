@@ -13,17 +13,7 @@ namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\Checker;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 
-class PaymentChecker implements PaymentCheckerInterface
+interface PaymentCheckerInterface
 {
-    public function isCashOnDelivery(OrderInterface $order, ShippingGatewayInterface $shippingGateway): bool
-    {
-        $codPaymentMethodCode = $shippingGateway->getConfigValue('cod_payment_method_code');
-        $payments = $order->getPayments();
-
-        foreach ($payments as $payment) {
-            return $payment->getMethod()->getCode() === $codPaymentMethodCode;
-        }
-
-        return false;
-    }
+    public function isCashOnDelivery(OrderInterface $order, ShippingGatewayInterface $shippingGateway): bool;
 }

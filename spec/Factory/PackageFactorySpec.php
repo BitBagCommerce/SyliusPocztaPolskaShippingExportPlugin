@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace spec\BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory;
 
-use BitBag\SyliusPocztaPolskaShippingExportPlugin\Checker\PaymentChecker;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Checker\PaymentCheckerInterface;
 use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\PackageFactory;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use PhpSpec\ObjectBehavior;
@@ -39,7 +39,7 @@ class PackageFactorySpec extends ObjectBehavior
     private const ACCOUNT_NUMBER = '1234';
 
     function let(
-        PaymentChecker $paymentChecker
+        PaymentCheckerInterface $paymentChecker
     ): void {
         $this->beConstructedWith(
             $paymentChecker
@@ -55,7 +55,7 @@ class PackageFactorySpec extends ObjectBehavior
         ShipmentInterface $shipmentInterface,
         OrderInterface $order,
         AddressInterface $address,
-        PaymentChecker $paymentChecker,
+        PaymentCheckerInterface $paymentChecker,
         ShippingGatewayInterface $shippingGateway
     ): void {
         $guid = self::GUID;
@@ -82,9 +82,8 @@ class PackageFactorySpec extends ObjectBehavior
         ShipmentInterface $shipmentInterface,
         OrderInterface $order,
         AddressInterface $address,
-        PaymentChecker $paymentChecker,
-        ShippingGatewayInterface $shippingGateway,
-        adresType $addressType
+        PaymentCheckerInterface $paymentChecker,
+        ShippingGatewayInterface $shippingGateway
     ): void {
         $guid = self::GUID;
         $shipmentInterface->getOrder()->willReturn($order);
@@ -112,7 +111,7 @@ class PackageFactorySpec extends ObjectBehavior
         ShipmentInterface $shipmentInterface,
         OrderInterface $order,
         AddressInterface $address,
-        PaymentChecker $paymentChecker,
+        PaymentCheckerInterface $paymentChecker,
         ShippingGatewayInterface $shippingGateway
     ): void {
         $guid = self::GUID;
@@ -139,9 +138,8 @@ class PackageFactorySpec extends ObjectBehavior
         ShipmentInterface $shipmentInterface,
         OrderInterface $order,
         AddressInterface $address,
-        PaymentChecker $paymentChecker,
-        ShippingGatewayInterface $shippingGateway,
-        adresType $addressType
+        PaymentCheckerInterface $paymentChecker,
+        ShippingGatewayInterface $shippingGateway
     ): void {
         $guid = self::GUID;
         $shipmentInterface->getOrder()->willReturn($order);

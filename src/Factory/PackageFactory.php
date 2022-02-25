@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory;
 
-use BitBag\SyliusPocztaPolskaShippingExportPlugin\Checker\PaymentChecker;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Checker\PaymentCheckerInterface;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
 use PocztaPolska\gabarytBiznesowaType;
 use PocztaPolska\pobranieType;
@@ -24,9 +24,9 @@ class PackageFactory implements PackageFactoryInterface
 {
     public const COUNTRY_CODE = 'PL';
 
-    private PaymentChecker $paymentChecker;
+    private PaymentCheckerInterface $paymentChecker;
 
-    public function __construct(PaymentChecker $paymentChecker)
+    public function __construct(PaymentCheckerInterface $paymentChecker)
     {
         $this->paymentChecker = $paymentChecker;
     }
