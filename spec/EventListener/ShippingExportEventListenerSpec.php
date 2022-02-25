@@ -58,7 +58,7 @@ final class ShippingExportEventListenerSpec extends ObjectBehavior
         $this->shouldHaveType(ShippingExportEventListener::class);
     }
 
-    function it_export_shipment_successfully(
+    function it_exports_shipment_successfully(
         ResourceControllerEvent $event,
         ShippingGatewayInterface $shippingGateway,
         ShipmentInterface $shipment,
@@ -101,7 +101,7 @@ final class ShippingExportEventListenerSpec extends ObjectBehavior
         $this->exportShipment($event);
     }
 
-    function it_return_null_when_code_is_wrong(
+    function it_returns_null_when_code_is_wrong(
         ShippingGatewayInterface $shippingGateway,
         ResourceControllerEvent $event,
         ShippingExportInterface $shippingExport,
@@ -147,10 +147,9 @@ final class ShippingExportEventListenerSpec extends ObjectBehavior
         )->shouldBeCalled();
 
         $this->exportShipment($event);
-
     }
 
-    function it_throw_exception_when_its_not_instance_of_interface(
+    function it_throws_exception_when_its_not_instance_of_interface(
         ResourceControllerEvent $event
     ): void {
         $event->getSubject()->willReturn('');
@@ -170,7 +169,7 @@ final class ShippingExportEventListenerSpec extends ObjectBehavior
             ->during('exportShipment', [$event]);
     }
 
-    function it_throw_exception_if_shipment_is_null(
+    function it_throws_exception_if_shipment_is_null(
         ShippingGatewayInterface $shippingGateway,
         ResourceControllerEvent $event,
         ShippingExportInterface $shippingExport

@@ -26,7 +26,7 @@ class ShipmentFactorySpec extends ObjectBehavior
         $this->shouldImplement(ShipmentFactoryInterface::class);
     }
 
-    function it_create_add_shipment_type_foreign_package(): void
+    function it_creates_add_shipment_type_foreign_package(): void
     {
         $package = $this->getForeignPackageData();
 
@@ -34,7 +34,7 @@ class ShipmentFactorySpec extends ObjectBehavior
             ->shouldBeLike($this->getExpectedResultForeignPackage());
     }
 
-    function it_create_add_shipment_type_domestic_package(): void
+    function it_creates_add_shipment_type_domestic_package(): void
     {
         $package = $this->getDomesticPackageData();
 

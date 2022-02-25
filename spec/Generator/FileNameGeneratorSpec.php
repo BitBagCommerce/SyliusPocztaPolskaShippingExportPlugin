@@ -29,7 +29,7 @@ final class FileNameGeneratorSpec extends ObjectBehavior
         $this->shouldImplement(FileNameGeneratorInterface::class);
     }
 
-    function it_throw_exception_if_shipment_is_null(
+    function it_throws_exception_if_shipment_is_null(
         ShippingExportInterface $shippingExport
     ): void {
         $shippingExport->getShipment()->willReturn(null);
@@ -38,7 +38,7 @@ final class FileNameGeneratorSpec extends ObjectBehavior
             ->during('generate', [$shippingExport]);
     }
 
-    function it_throw_exception_if_order_is_null(
+    function it_throws_exception_if_order_is_null(
         ShippingExportInterface $shippingExport,
         ShipmentInterface $shipment
     ): void {
