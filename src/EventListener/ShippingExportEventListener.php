@@ -1,65 +1,123 @@
 <?php
 
+/*
+ * This file was created by developers working at BitBag
+ * Do you need more information about us and what we do? Visit our https://bitbag.io website!
+ * We are hiring developers from all over the world. Join us and start your new, exciting adventure and become part of us: https://bitbag.io/career
+*/
+
+declare(strict_types=1);
+
 namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\EventListener;
 
-use BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\SoapClientInterface;
 use BitBag\SyliusPocztaPolskaShippingExportPlugin\Api\WebClientInterface;
-use BitBag\SyliusShippingExportPlugin\Event\ExportShipmentEvent;
+use BitBag\SyliusPocztaPolskaShippingExportPlugin\Generator\FileNameGeneratorInterface;
+use BitBag\SyliusShippingExportPlugin\Entity\ShippingExportInterface;
+use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
+use BitBag\SyliusShippingExportPlugin\Repository\ShippingExportRepository;
+use DateTime;
+use SoapFault;
+use Sylius\Bundle\ResourceBundle\Event\ResourceControllerEvent;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Webmozart\Assert\Assert;
 
 final class ShippingExportEventListener
 {
-    const POCZTA_POLSKA_GATEWAY_CODE = 'poczta_polska';
-    const BASE_LABEL_EXTENSION = 'pdf';
+    public const POCZTA_POLSKA_GATEWAY_CODE = 'poczta_polska';
 
-    /**
-     * @var WebClientInterface
-     */
-    private $webClient;
+    private Filesystem $filesystem;
 
-    private $soapClient;
+    private ShippingExportRepository $shippingExportRepository;
 
-    /**
-     * @param WebClientInterface $webClient
-     * @param SoapClientInterface $soapClient
-     */
-    public function __construct(WebClientInterface $webClient, SoapClientInterface $soapClient)
-    {
+    private string $shippingLabelsPath;
+
+    private WebClientInterface $webClient;
+
+    private FlashBagInterface $flashBag;
+
+    private FileNameGeneratorInterface $fileNameGenerator;
+
+    public function __construct(
+        Filesystem $filesystem,
+        ShippingExportRepository $shippingExportRepository,
+        string $shippingLabelsPath,
+        WebClientInterface $webClient,
+        FlashBagInterface $flashBag,
+        fileNameGeneratorInterface $fileNameGenerator
+    ) {
+        $this->filesystem = $filesystem;
+        $this->shippingExportRepository = $shippingExportRepository;
+        $this->shippingLabelsPath = $shippingLabelsPath;
         $this->webClient = $webClient;
-        $this->soapClient = $soapClient;
+        $this->flashBag = $flashBag;
+        $this->fileNameGenerator = $fileNameGenerator;
     }
 
-    /**
-     * @param ExportShipmentEvent $exportShipmentEvent
-     */
-    public function exportShipment(ExportShipmentEvent $exportShipmentEvent)
+    public function exportShipment(ResourceControllerEvent $event): void
     {
-        $shippingExport = $exportShipmentEvent->getShippingExport();
-        $shippingGateway = $shippingExport->getShippingGateway();
+        /** @var ShippingExportInterface $shippingExport */
+        $shippingExport = $event->getSubject();
+        Assert::isInstanceOf($shippingExport, ShippingExportInterface::class);
 
-        if ($shippingGateway->getCode() !== self::POCZTA_POLSKA_GATEWAY_CODE) {
-            return;
-        }
+        /** @var ShippingGatewayInterface $shippingGateway */
+        $shippingGateway = $shippingExport->getShippingGateway();
+        Assert::notNull($shippingGateway);
 
         $shipment = $shippingExport->getShipment();
+        Assert::notNull($shipment);
 
-        $this->webClient->setShippingGateway($shippingGateway);
-        $this->webClient->setShipment($shipment);
+        if (self::POCZTA_POLSKA_GATEWAY_CODE !== $shippingGateway->getCode()) {
+            return;
+        }
 
         try {
-            $label = $this->webClient->createLabel();
-        } catch (\Exception $exception) {
-            $exportShipmentEvent->addErrorFlash(sprintf(
-                "Poczta polska Web Service for #%s order: %s",
-                $shipment->getOrder()->getNumber(),
-                $exception->getMessage()));
+            $this->webClient->setShippingGateway($shippingGateway);
+            $this->webClient->setShipment($shipment);
+
+            $this->webClient->createLabel();
+
+            $labelContent = $this->webClient->getLabelContent();
+            Assert::notNull($labelContent);
+
+            $this->saveShippingLabel($shippingExport, $labelContent, 'pdf');
+        } catch (SoapFault $exception) {
+            $this->flashBag->add(
+                'error',
+                sprintf(
+                    'Poczta Polska Web Service for #%s order: %s',
+                    $shipment->getOrder()->getNumber(),
+                    $exception->getMessage()
+                )
+            );
 
             return;
         }
-//      TODO: Add setTracking to ShippingExportPlugin
-//      $shipment->setTracking($label->content->nrNadania);
 
-        $exportShipmentEvent->saveShippingLabel($label->content->pdfContent, 'pdf');
-        $exportShipmentEvent->addSuccessFlash();
-        $exportShipmentEvent->exportShipment();
+        $this->flashBag->add('success', 'bitbag.ui.shipment_data_has_been_exported');
+        $this->markShipmentAsExported($shippingExport);
+    }
+
+    public function saveShippingLabel(
+        ShippingExportInterface $shippingExport,
+        string $labelContent,
+        string $labelExtension
+    ): void {
+        $labelPath = $this->shippingLabelsPath
+            . '/' . $this->fileNameGenerator->generate($shippingExport)
+            . '.' . $labelExtension;
+
+        $this->filesystem->dumpFile($labelPath, $labelContent);
+        $shippingExport->setLabelPath($labelPath);
+
+        $this->shippingExportRepository->add($shippingExport);
+    }
+
+    private function markShipmentAsExported(ShippingExportInterface $shippingExport): void
+    {
+        $shippingExport->setState(ShippingExportInterface::STATE_EXPORTED);
+        $shippingExport->setExportedAt(new DateTime());
+
+        $this->shippingExportRepository->add($shippingExport);
     }
 }

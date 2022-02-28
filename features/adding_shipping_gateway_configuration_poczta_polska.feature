@@ -17,12 +17,10 @@ Feature: Creating shipping gateway
         And I fill the "Username" field with "123"
         And I fill the "Password" field with "123"
         And I fill the "Client number" field with "1204663"
-        And I fill the "Country" field with "PL"
         And I fill the "Name (first and last name or company name)" field with "Ja"
         And I fill the "Postal Code" field with "00001"
         And I fill the "City" field with "Wawa"
-        And I fill the "Street" field with "Leśna"
-        And I fill the "House number" field with "7"
+        And I fill the "Address" field with "Leśna 7"
         And I fill the "Phone number" field with "123456789"
         And I fill the "Shipment start hour" field with "12:00"
         And I fill the "Shipment end hour" field with "15:00"
@@ -35,8 +33,5 @@ Feature: Creating shipping gateway
         And I fill the "Payment method" select option with "Bank transfer"
         And I fill the "Type of request" select option with "Order courier"
         And I fill the "Type of transport service" select option with "Domestic shipment"
-        And I fill the "Choosing a return label" select option with "BLP label in Zebra printers format"
-        And I fill the "Type of package" select option with "Palette"
-        And I fill the "Form of download return in COD service" select option with "Bank transfer"
         And I add it
         Then I should be notified that the shipping gateway has been created

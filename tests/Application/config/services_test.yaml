@@ -3,7 +3,11 @@ imports:
     - { resource: "../../Behat/Resources/config/services.yml" }
     - { resource: "../../../vendor/sylius/sylius/src/Sylius/Behat/Resources/config/services.xml" }
 
+# workaround needed for strange "test.client.history" problem
+# see https://github.com/FriendsOfBehat/SymfonyExtension/issues/88
 services:
+    Symfony\Component\BrowserKit\AbstractBrowser: '@test.client'
+
     bitbag.poczta_polska_shipping_export_plugin.behat.mocker.poczta_polska_api_mocker:
         class: Tests\BitBag\SyliusPocztaPolskaShippingExportPlugin\Behat\Mocker\PocztaPolskaApiMocker
         arguments:
