@@ -125,7 +125,6 @@ jobs:
         name: Install JS dependencies
         run: |
           (cd tests/Application && yarn install)
-          (cd tests/Application && yarn encore dev)
 
       -
         name: Prepare test application database
