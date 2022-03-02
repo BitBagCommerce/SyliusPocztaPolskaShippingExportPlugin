@@ -15,9 +15,9 @@
     ],
     "require": {
         "php": "^7.4 || ^8.0",
-        "bitbag/shipping-export-plugin": "^1.5",
+        "bitbag/shipping-export-plugin": "^1.7",
         "printu/elektroniczny-nadawca": "dev-master",
-        "sylius/sylius": "^1.10",
+        "sylius/sylius": "~1.10.0 || ~1.11.0",
         "ext-soap": "*"
     },
     "require-dev": {
