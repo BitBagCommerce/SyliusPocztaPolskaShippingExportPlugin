@@ -1,4 +1,4 @@
-# [![](https://bitbag.io/wp-content/uploads/2021/01/CMS.png)](https://bitbag.io/contact-us/?utm_source=github&utm_medium=referral&utm_campaign=plugins_cms)
+# [![](https://bitbag.io/wp-content/uploads/2022/03/SyliusPocztaPolskaShippingExportPlugin.png)](https://bitbag.io/contact-us/?utm_source=github&utm_medium=referral&utm_campaign=plugins_pocztapolska)
 
 # BitBag SyliusPocztaPolskaShippingExportPlugin
 
