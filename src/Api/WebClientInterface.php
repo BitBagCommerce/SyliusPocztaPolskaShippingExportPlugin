@@ -11,9 +11,9 @@ declare(strict_types=1);
 namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\Api;
 
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
+use PocztaPolska\getAddresLabelByGuidResponse;
 use SoapFault;
 use Sylius\Component\Core\Model\ShipmentInterface;
-use PocztaPolska\getAddresLabelByGuidResponse;
 
 interface WebClientInterface
 {

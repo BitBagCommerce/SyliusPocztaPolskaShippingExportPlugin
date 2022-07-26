@@ -16,6 +16,7 @@ use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\PackageFactoryInterfac
 use BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory\ShipmentFactoryInterface;
 use BitBag\SyliusPocztaPolskaShippingExportPlugin\Generator\GuidGeneratorInterface;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
+use PocztaPolska\ElektronicznyNadawca;
 use PocztaPolska\getAddresLabelByGuidResponse;
 use PocztaPolska\getEnvelopeBufor;
 use PocztaPolska\getUrzedyNadania;
@@ -23,7 +24,6 @@ use PocztaPolska\sendEnvelope;
 use SoapFault;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\ShipmentInterface;
-use PocztaPolska\ElektronicznyNadawca;
 
 final class WebClient implements WebClientInterface
 {
@@ -89,7 +89,7 @@ final class WebClient implements WebClientInterface
 
     public function getLabelContent(): ?string
     {
-        return base64_decode((string)$this->createLabel()->content->pdfContent);
+        return base64_decode((string) $this->createLabel()->content->pdfContent);
     }
 
     /**
@@ -103,11 +103,11 @@ final class WebClient implements WebClientInterface
 
         $packagesShipped = [];
 
-        if(is_array($packages)) {
+        if (is_array($packages)) {
             foreach ($packages as $package) {
                 $packagesShipped[] = $package->guid;
             }
-        } else if($packages !== null) {
+        } elseif (null !== $packages) {
             $packagesShipped[] = $packages->guid;
         } else {
             return [];
@@ -119,11 +119,9 @@ final class WebClient implements WebClientInterface
         $sendEnvelope = new sendEnvelope();
         $sendEnvelope->urzadNadania = $post->urzadNadania;
 
-
         $sendEnvelopeResponseType = $this->connection->sendEnvelope($sendEnvelope);
 
-
-        if ($sendEnvelopeResponseType->error === null) {
+        if (null === $sendEnvelopeResponseType->error) {
             return $packagesShipped;
         }
 
@@ -139,7 +137,7 @@ final class WebClient implements WebClientInterface
             $this->getShippingGatewayConfig('wsdl'),
             [
                 'login' => $this->getShippingGatewayConfig('login'),
-                'password' => $this->getShippingGatewayConfig('password')
+                'password' => $this->getShippingGatewayConfig('password'),
             ]
         );
     }

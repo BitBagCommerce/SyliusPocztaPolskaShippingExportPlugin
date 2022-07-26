@@ -18,8 +18,7 @@ interface PackageFactoryInterface
 {
     public function createNew(
         AdresType $addressType,
-        ShippingGatewayInterface
-        $shippingGateway,
+        ShippingGatewayInterface $shippingGateway,
         string $guid,
         ShipmentInterface $shipmentInterface
     ): object;
