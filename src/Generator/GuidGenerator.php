@@ -14,8 +14,9 @@ class GuidGenerator implements GuidGeneratorInterface
 {
     public function generate(): string
     {
-        mt_srand((int)microtime()*10000);
-        $charId = strtoupper(md5(uniqid((string)rand(), true)));
+        mt_srand((int) microtime() * 10000);
+        $charId = strtoupper(md5(uniqid((string) rand(), true)));
+
         return substr($charId, 0, 32);
     }
 }

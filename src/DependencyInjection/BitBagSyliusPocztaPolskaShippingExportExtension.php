@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 final class BitBagSyliusPocztaPolskaShippingExportExtension extends Extension
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function load(array $config, ContainerBuilder $container)
     {
@@ -27,4 +27,3 @@ final class BitBagSyliusPocztaPolskaShippingExportExtension extends Extension
         $loader->load('services.yml');
     }
 }
-

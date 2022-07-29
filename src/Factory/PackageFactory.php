@@ -12,12 +12,12 @@ namespace BitBag\SyliusPocztaPolskaShippingExportPlugin\Factory;
 
 use BitBag\SyliusPocztaPolskaShippingExportPlugin\Checker\PaymentCheckerInterface;
 use BitBag\SyliusShippingExportPlugin\Entity\ShippingGatewayInterface;
+use PocztaPolska\adresType;
 use PocztaPolska\gabarytBiznesowaType;
 use PocztaPolska\pobranieType;
 use PocztaPolska\przesylkaBiznesowaType;
 use PocztaPolska\przesylkaPoleconaZagranicznaType;
 use PocztaPolska\sposobPobraniaType;
-use PocztaPolska\adresType;
 use Sylius\Component\Core\Model\ShipmentInterface;
 
 class PackageFactory implements PackageFactoryInterface
@@ -39,7 +39,7 @@ class PackageFactory implements PackageFactoryInterface
     ): object {
         $order = $shipmentInterface->getOrder();
 
-        if ($order->getShippingAddress()->getCountryCode() !== self::COUNTRY_CODE) {
+        if (self::COUNTRY_CODE !== $order->getShippingAddress()->getCountryCode()) {
             $package = new przesylkaPoleconaZagranicznaType();
         } else {
             $package = new PrzesylkaBiznesowaType();
@@ -56,7 +56,7 @@ class PackageFactory implements PackageFactoryInterface
         }
 
         $package->adres = $addressType;
-        if ($order->getShippingAddress()->getCountryCode() !== self::COUNTRY_CODE) {
+        if (self::COUNTRY_CODE !== $order->getShippingAddress()->getCountryCode()) {
             $package->adres->kraj = $order->getShippingAddress()->getCountryCode();
         }
         $package->gabaryt = gabarytBiznesowaType::M;
