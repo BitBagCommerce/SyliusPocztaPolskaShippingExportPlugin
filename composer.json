@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": "^7.4 || ^8.0",
-        "bitbag/shipping-export-plugin": "^1.7",
+        "bitbag/shipping-export-plugin": "^3.0",
         "printu/elektroniczny-nadawca": "dev-master",
         "sylius/sylius": "~1.10.0 || ~1.11.0",
         "ext-soap": "*"
@@ -57,7 +57,8 @@
             "phpstan/extension-installer": true,
             "composer/package-versions-deprecated": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "symfony/thanks": true
+            "symfony/thanks": true,
+            "symfony/flex": true
         }
     },
     "prefer-stable": true,
