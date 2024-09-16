@@ -1,10 +1,11 @@
 <?php
 
 /*
- * This file was created by developers working at BitBag
- * Do you need more information about us and what we do? Visit our https://bitbag.io website!
- * We are hiring developers from all over the world. Join us and start your new, exciting adventure and become part of us: https://bitbag.io/career
-*/
+ * This file has been created by developers from BitBag.
+ * Feel free to contact us once you face any issues or want to start
+ * You can find more information about us on https://bitbag.io and write us
+ * an email on hello@bitbag.io.
+ */
 
 declare(strict_types=1);
 
@@ -19,7 +20,7 @@ use DateTime;
 use SoapFault;
 use Sylius\Bundle\ResourceBundle\Event\ResourceControllerEvent;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Webmozart\Assert\Assert;
 
 final class ShippingExportEventListener
@@ -34,7 +35,7 @@ final class ShippingExportEventListener
 
     private WebClientInterface $webClient;
 
-    private FlashBagInterface $flashBag;
+    private RequestStack $requestStack;
 
     private FileNameGeneratorInterface $fileNameGenerator;
 
@@ -43,14 +44,14 @@ final class ShippingExportEventListener
         ShippingExportRepository $shippingExportRepository,
         string $shippingLabelsPath,
         WebClientInterface $webClient,
-        FlashBagInterface $flashBag,
-        fileNameGeneratorInterface $fileNameGenerator
+        RequestStack $requestStack,
+        fileNameGeneratorInterface $fileNameGenerator,
     ) {
         $this->filesystem = $filesystem;
         $this->shippingExportRepository = $shippingExportRepository;
         $this->shippingLabelsPath = $shippingLabelsPath;
         $this->webClient = $webClient;
-        $this->flashBag = $flashBag;
+        $this->requestStack = $requestStack;
         $this->fileNameGenerator = $fileNameGenerator;
     }
 
@@ -71,6 +72,8 @@ final class ShippingExportEventListener
             return;
         }
 
+        $flashBag = $this->requestStack->getSession()->getBag('flashes');
+
         try {
             $this->webClient->setShippingGateway($shippingGateway);
             $this->webClient->setShipment($shipment);
@@ -82,26 +85,25 @@ final class ShippingExportEventListener
 
             $this->saveShippingLabel($shippingExport, $labelContent, 'pdf');
         } catch (SoapFault $exception) {
-            $this->flashBag->add(
+            $flashBag->add(
                 'error',
                 sprintf(
                     'Poczta Polska Web Service for #%s order: %s',
                     $shipment->getOrder()->getNumber(),
-                    $exception->getMessage()
-                )
+                    $exception->getMessage(),
+                ),
             );
 
             return;
         }
-
-        $this->flashBag->add('success', 'bitbag.ui.shipment_data_has_been_exported');
+        $flashBag->add('success', 'bitbag.ui.shipment_data_has_been_exported');
         $this->markShipmentAsExported($shippingExport);
     }
 
     public function saveShippingLabel(
         ShippingExportInterface $shippingExport,
         string $labelContent,
-        string $labelExtension
+        string $labelExtension,
     ): void {
         $labelPath = $this->shippingLabelsPath
             . '/' . $this->fileNameGenerator->generate($shippingExport)

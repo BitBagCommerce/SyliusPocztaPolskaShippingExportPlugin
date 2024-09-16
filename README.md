@@ -76,8 +76,7 @@ The SyliusPocztaPolskaShippingExportPlugin allows integrating Sylius with Poczta
 ---
 
 ```bash
-$ composer require bitbag/poczta-polska-shipping-export-plugin
-
+composer require bitbag/poczta-polska-shipping-export-plugin
 ```
 
 Add plugin dependencies to your config/bundles.php file:
@@ -90,20 +89,52 @@ return [
 ];
 ```
 
+Import required config in your `config/packages/bitbag_shipping_export_plugin.yaml` file (if it doesn't exist):
+
+```yaml
+# config/packages/bitbag_shipping_export_plugin.yaml
+
+imports:
+  ...
+
+  - { resource: "@BitBagSyliusShippingExportPlugin/Resources/config/config.yml" }
+```
+
+Import routing in your `config/routes/bitbag_shipping_export_plugin.yaml` file (if it doesn't exist):
+
+```yaml
+
+# config/routes/bitbag_shipping_export_plugin.yaml
+...
+
+bitbag_shipping_export_plugin:
+  resource: "@BitBagSyliusShippingExportPlugin/Resources/config/routing.yml"
+  prefix: /admin
+```
+
+
+Finish the installation by updating the database schema:
+```
+bin/console doctrine:migrations:diff
+bin/console doctrine:migrations:migrate
+bin/console cache:clear
+```
+
 ## Testing
+Recommended Node version for testing = 14.*
 
 ```bash
-$ composer install
-$ cd tests/Application
-$ yarn install
-$ yarn run gulp
-$ bin/console doctrine:database:create --env=test 
-$ bin/console doctrine:schema:create --env=test
-$ bin/console sylius:fixtures:load --env=test
-$ APP_ENV=test symfony server:start --dir=public/
-$ cd ../..
-$ vendor/bin/behat
-$ vendor/bin/phpspec run
+composer install
+cd tests/Application
+yarn install
+yarn run encore dev
+bin/console doctrine:database:create --env=test 
+bin/console doctrine:schema:create --env=test
+bin/console sylius:fixtures:load --env=test
+APP_ENV=test symfony server:start --dir=public/
+cd ../..
+vendor/bin/behat
+vendor/bin/phpspec run
 ```
 
 # Functionalities

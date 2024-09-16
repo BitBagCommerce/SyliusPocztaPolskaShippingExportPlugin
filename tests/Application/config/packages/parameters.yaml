@@ -1,0 +1,4 @@
+parameters:
+  sylius_core.public_dir: '%kernel.project_dir%/public'
+  bitbag.shipping_gateway.validation_groups: [ 'bitbag' ]
+  bitbag.shipping_labels_path: '%kernel.project_dir%/shipping_labels'

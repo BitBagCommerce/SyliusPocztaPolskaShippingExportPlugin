@@ -11,7 +11,7 @@ services:
             - '@bitbag.repository.shipping_export'
             - '%bitbag.shipping_labels_path%'
             - '@bitbag.poczta_polska_shipping_export_plugin.api.web_client'
-            - '@session.flash_bag'
+            - '@request_stack'
             - '@bitbag.poczta_polska_shipping_export_plugin.file_name_generator'
         tags:
             - { name: kernel.event_listener, event: 'bitbag.shipping_export.export_shipment', method: exportShipment }

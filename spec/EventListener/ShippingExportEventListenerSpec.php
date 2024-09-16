@@ -23,7 +23,9 @@ use Sylius\Bundle\ResourceBundle\Event\ResourceControllerEvent;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\ShipmentInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 final class ShippingExportEventListenerSpec extends ObjectBehavior
 {
@@ -39,7 +41,7 @@ final class ShippingExportEventListenerSpec extends ObjectBehavior
         Filesystem $filesystem,
         ShippingExportRepository $shippingExportRepository,
         WebClientInterface $webClient,
-        FlashBagInterface $flashBag,
+        RequestStack $requestStack,
         FileNameGeneratorInterface $fileNameGenerator
     ): void {
         $shippingLabelsPath = 'labels';
@@ -48,7 +50,7 @@ final class ShippingExportEventListenerSpec extends ObjectBehavior
             $shippingExportRepository,
             $shippingLabelsPath,
             $webClient,
-            $flashBag,
+            $requestStack,
             $fileNameGenerator
         );
     }
@@ -66,6 +68,8 @@ final class ShippingExportEventListenerSpec extends ObjectBehavior
         ShippingExportInterface $shippingExport,
         OrderInterface $order,
         FileNameGeneratorInterface $fileNameGenerator,
+        RequestStack $requestStack,
+        SessionInterface $session,
         FlashBagInterface $flashBag,
         getAddresLabelByGuidResponse $guidResponse
     ): void {
@@ -89,6 +93,8 @@ final class ShippingExportEventListenerSpec extends ObjectBehavior
                 self::ORDER_NUMBER
             )
         )->shouldBeCalled();
+        $requestStack->getSession()->willReturn($session);
+        $session->getBag('flashes')->willReturn($flashBag);
         $flashBag->add(
             'success',
             'bitbag.ui.shipment_data_has_been_exported'
@@ -122,6 +128,8 @@ final class ShippingExportEventListenerSpec extends ObjectBehavior
         WebClientInterface $webClient,
         ShippingExportInterface $shippingExport,
         OrderInterface $order,
+        RequestStack $requestStack,
+        SessionInterface $session,
         FlashBagInterface $flashBag
     ): void {
         $event->getSubject()->willReturn($shippingExport);
@@ -137,6 +145,8 @@ final class ShippingExportEventListenerSpec extends ObjectBehavior
         $webClient->setShippingGateway($shippingGateway)->shouldBeCalled();
         $webClient->setShipment($shipment)->shouldBeCalled();
 
+        $requestStack->getSession()->willReturn($session);
+        $session->getBag('flashes')->willReturn($flashBag);
         $flashBag->add(
             'error',
             sprintf(

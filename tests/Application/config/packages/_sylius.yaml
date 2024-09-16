@@ -9,10 +9,8 @@ imports:
 
     - { resource: "@BitBagSyliusShippingExportPlugin/Resources/config/config.yml" }
 
-parameters:
-    sylius_core.public_dir: '%kernel.project_dir%/public'
-    bitbag.shipping_gateway.validation_groups: [ 'bitbag' ]
-    bitbag.shipping_labels_path: '%kernel.project_dir%/shipping_labels'
+sylius_api:
+  enabled: true
 
 sylius_shop:
     product_grid:
