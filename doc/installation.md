@@ -33,23 +33,24 @@ Add plugin dependencies to your `config/bundles.php` file:
 
 return [
     ...
+    BitBag\SyliusShippingExportPlugin\BitBagSyliusShippingExportPlugin::class => ['all' => true],
     BitBag\SyliusPocztaPolskaShippingExportPlugin\BitBagSyliusPocztaPolskaShippingExportPlugin::class => ['all' => true],
 ];
 ```
 
-Import required config in your `config/packages/_sylius.yaml` file:
+Import required config in your `config/packages/bitbag_shipping_export_plugin.yaml` file (if it doesn't exist):
 
 ```yaml
-# config/packages/_sylius.yaml
+# config/packages/bitbag_shipping_export_plugin.yaml
 
 imports:
     ...
     - { resource: "@BitBagSyliusShippingExportPlugin/Resources/config/config.yml" }
 ```
 
-Add routing to your `config/routes.yaml` file:
+Import routing in your `config/routes/bitbag_shipping_export_plugin.yaml` file (if it doesn't exist):
 ```yaml
-# config/routes.yaml
+# config/routes/bitbag_shipping_export_plugin.yaml
 
 bitbag_shipping_export_plugin:
     resource: "@BitBagSyliusShippingExportPlugin/Resources/config/routing.yml"
