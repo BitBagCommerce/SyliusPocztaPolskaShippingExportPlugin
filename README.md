@@ -58,7 +58,6 @@ We have a 70-person team of experts: business analysts and consultants, eCommerc
 
 * [Overview](#overview)
 * [Installation](#installation)
-    * [Testing](#testing)
 * [Functionalities](#functionalities)
 * [Demo](#demo)
 * [Additional resources for developers](#additional-resources-for-developers)
@@ -73,69 +72,18 @@ We have a 70-person team of experts: business analysts and consultants, eCommerc
 The SyliusPocztaPolskaShippingExportPlugin allows integrating Sylius with Poczta Polska. 
 
 # Installation
+The installation process for the `PocztaPolskaShippingExportPlugin` can be found [here](doc/installation.md).
+
 ---
+## Requirements
 
-```bash
-composer require bitbag/poczta-polska-shipping-export-plugin
-```
+We work on stable, supported and up-to-date versions of packages. We recommend you to do the same.
 
-Add plugin dependencies to your config/bundles.php file:
-
-```php
-return [
-    ...
-
-    BitBag\SyliusPocztaPolskaShippingExportPlugin\BitBagSyliusPocztaPolskaShippingExportPlugin::class => ['all' => true],
-];
-```
-
-Import required config in your `config/packages/bitbag_shipping_export_plugin.yaml` file (if it doesn't exist):
-
-```yaml
-# config/packages/bitbag_shipping_export_plugin.yaml
-
-imports:
-  ...
-
-  - { resource: "@BitBagSyliusShippingExportPlugin/Resources/config/config.yml" }
-```
-
-Import routing in your `config/routes/bitbag_shipping_export_plugin.yaml` file (if it doesn't exist):
-
-```yaml
-
-# config/routes/bitbag_shipping_export_plugin.yaml
-...
-
-bitbag_shipping_export_plugin:
-  resource: "@BitBagSyliusShippingExportPlugin/Resources/config/routing.yml"
-  prefix: /admin
-```
-
-
-Finish the installation by updating the database schema:
-```
-bin/console doctrine:migrations:diff
-bin/console doctrine:migrations:migrate
-bin/console cache:clear
-```
-
-## Testing
-Recommended Node version for testing = 14.*
-
-```bash
-composer install
-cd tests/Application
-yarn install
-yarn run encore dev
-bin/console doctrine:database:create --env=test 
-bin/console doctrine:schema:create --env=test
-bin/console sylius:fixtures:load --env=test
-APP_ENV=test symfony server:start --dir=public/
-cd ../..
-vendor/bin/behat
-vendor/bin/phpspec run
-```
+| Package       | Version         |
+|---------------|-----------------|
+| PHP           | \>=8.0          |
+| sylius/sylius | 1.12.x - 1.13.x |
+| MySQL         | \>= 5.7         |
 
 # Functionalities
 ---
